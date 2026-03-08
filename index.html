@@ -39,34 +39,7 @@
                 <button id="start-btn" class="start-btn">Start</button>
 
                 <div class="participants">
-                    <div class="participant" data-name="Lidia">
-                        <button class="participant-btn active">
-                            <span class="name">Lidia</span>
-                            <span class="time"></span>
-                        </button>
-                        <div class="toggle-indicator"></div>
-                    </div>
-                    <div class="participant" data-name="Sasha">
-                        <button class="participant-btn active">
-                            <span class="name">Sasha</span>
-                            <span class="time"></span>
-                        </button>
-                        <div class="toggle-indicator"></div>
-                    </div>
-                    <div class="participant" data-name="Lev">
-                        <button class="participant-btn active">
-                            <span class="name">Lev</span>
-                            <span class="time"></span>
-                        </button>
-                        <div class="toggle-indicator"></div>
-                    </div>
-                    <div class="participant" data-name="Egor">
-                        <button class="participant-btn active">
-                            <span class="name">Egor</span>
-                            <span class="time"></span>
-                        </button>
-                        <div class="toggle-indicator"></div>
-                    </div>
+                    <!-- Participants loaded dynamically from Firestore config -->
                 </div>
             </section>
 
@@ -98,22 +71,7 @@
             <!-- Graphs Tab -->
             <section id="graphs" class="tab-content">
                 <div class="graphs-container">
-                    <div class="graph-card">
-                        <h3>Lidia</h3>
-                        <canvas id="chart-Lidia"></canvas>
-                    </div>
-                    <div class="graph-card">
-                        <h3>Sasha</h3>
-                        <canvas id="chart-Sasha"></canvas>
-                    </div>
-                    <div class="graph-card">
-                        <h3>Lev</h3>
-                        <canvas id="chart-Lev"></canvas>
-                    </div>
-                    <div class="graph-card">
-                        <h3>Egor</h3>
-                        <canvas id="chart-Egor"></canvas>
-                    </div>
+                    <!-- Graph cards loaded dynamically from Firestore config -->
                 </div>
             </section>
         </main>

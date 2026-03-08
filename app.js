@@ -1,13 +1,15 @@
 // Plank Timer App with Firebase
-import { auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, collection, addDoc, getDocs, deleteDoc, updateDoc, doc, query, orderBy } from './firebase-config.js';
+import { auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, collection, addDoc, getDocs, deleteDoc, updateDoc, doc, query, orderBy, getDoc, setDoc } from './firebase-config.js';
+import { DEFAULT_PARTICIPANTS } from './config.js';
 
-const PARTICIPANTS = ['Lidia', 'Sasha', 'Lev', 'Egor'];
+// Participants loaded from Firestore config
+let PARTICIPANTS = [];
 
 // State
 let state = {
     isRunning: false,
     startTime: null,
-    activeParticipants: new Set(PARTICIPANTS),
+    activeParticipants: new Set(),
     currentRound: {},
     timerInterval: null,
     user: null,
@@ -17,6 +19,57 @@ let state = {
 let viewingMonth = new Date();
 let charts = {};
 let selectedDate = null;
+
+// Config functions
+async function loadParticipantsConfig() {
+    try {
+        const configRef = doc(db, 'config', 'participants');
+        const configSnap = await getDoc(configRef);
+
+        if (configSnap.exists()) {
+            PARTICIPANTS = configSnap.data().names || [];
+        } else {
+            // Initialize with default participants if config doesn't exist
+            const defaultParticipants = [...DEFAULT_PARTICIPANTS];
+            await setDoc(configRef, { names: defaultParticipants });
+            PARTICIPANTS = defaultParticipants;
+        }
+
+        state.activeParticipants = new Set(PARTICIPANTS);
+        generateParticipantUI();
+        generateGraphCards();
+    } catch (error) {
+        console.error('Error loading participants config:', error);
+        // Fallback to defaults if config load fails
+        PARTICIPANTS = [...DEFAULT_PARTICIPANTS];
+        state.activeParticipants = new Set(PARTICIPANTS);
+        generateParticipantUI();
+        generateGraphCards();
+    }
+}
+
+function generateParticipantUI() {
+    const container = document.querySelector('.participants');
+    container.innerHTML = PARTICIPANTS.map(name => `
+        <div class="participant" data-name="${name}">
+            <button class="participant-btn active">
+                <span class="name">${name}</span>
+                <span class="time"></span>
+            </button>
+            <div class="toggle-indicator"></div>
+        </div>
+    `).join('');
+}
+
+function generateGraphCards() {
+    const container = document.querySelector('.graphs-container');
+    container.innerHTML = PARTICIPANTS.map(name => `
+        <div class="graph-card">
+            <h3>${name}</h3>
+            <canvas id="chart-${name}"></canvas>
+        </div>
+    `).join('');
+}
 
 // Auth functions
 function initAuth() {
@@ -58,8 +111,11 @@ function initAuth() {
             content.classList.remove('app-disabled');
             tabs.classList.remove('app-disabled');
 
-            // Load data from Firestore
+            // Load config and data from Firestore
+            await loadParticipantsConfig();
             await loadRounds();
+            initTimerTab();
+            initGraphsTab();
             renderCalendar();
             updateGraphs();
         } else {
@@ -492,6 +548,7 @@ function initGraphsTab() {
 
 function updateGraphs() {
     PARTICIPANTS.forEach(name => {
+        if (!charts[name]) return; // Chart not initialized yet
         const participantData = state.rounds
             .filter(r => r.participants[name] !== undefined && r.participants[name] !== null)
             .map(r => ({
@@ -534,7 +591,6 @@ function initTabs() {
 document.addEventListener('DOMContentLoaded', () => {
     initAuth();
     initTabs();
-    initTimerTab();
     initHistoryTab();
-    initGraphsTab();
+    // initTimerTab and initGraphsTab are called after config loads in onAuthStateChanged
 });
