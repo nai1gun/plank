@@ -216,7 +216,9 @@ function handleStartCancel() {
     if (!state.isRunning) {
         startRound();
     } else {
-        cancelRound();
+        if (confirm('Cancel the current round?')) {
+            cancelRound();
+        }
     }
 }
 
