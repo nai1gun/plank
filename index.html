@@ -80,5 +80,71 @@
     <footer class="footer">
         Plank app by Lidia and Alex
     </footer>
+
+    <!-- Debug Panel -->
+    <button id="debug-toggle" class="debug-toggle">Debug: OFF</button>
+    <div id="debug-panel" class="debug-panel hidden">
+        <div class="debug-header">
+            <span>Debug Log</span>
+            <button id="debug-clear">Clear</button>
+        </div>
+        <div id="debug-log"></div>
+    </div>
+    <script>
+    (function() {
+        var isOn = false;
+        var toggle = document.getElementById('debug-toggle');
+        var panel = document.getElementById('debug-panel');
+        var logEl = document.getElementById('debug-log');
+        var clearBtn = document.getElementById('debug-clear');
+
+        function addEntry(type, msg) {
+            var time = new Date().toLocaleTimeString();
+            var entry = document.createElement('div');
+            entry.className = 'debug-entry ' + type;
+            entry.textContent = '[' + time + '] ' + msg;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        toggle.addEventListener('click', function() {
+            isOn = !isOn;
+            panel.classList.toggle('hidden', !isOn);
+            toggle.classList.toggle('active', isOn);
+            toggle.textContent = isOn ? 'Debug: ON' : 'Debug: OFF';
+        });
+
+        clearBtn.addEventListener('click', function() {
+            logEl.innerHTML = '';
+        });
+
+        var origLog = console.log.bind(console);
+        var origError = console.error.bind(console);
+        var origWarn = console.warn.bind(console);
+
+        console.log = function() {
+            origLog.apply(console, arguments);
+            addEntry('info', Array.from(arguments).join(' '));
+        };
+        console.error = function() {
+            origError.apply(console, arguments);
+            addEntry('error', Array.from(arguments).join(' '));
+        };
+        console.warn = function() {
+            origWarn.apply(console, arguments);
+            addEntry('warn', Array.from(arguments).join(' '));
+        };
+
+        window.addEventListener('error', function(e) {
+            addEntry('error', 'Uncaught: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+            addEntry('error', 'Promise rejected: ' + e.reason);
+        });
+
+        addEntry('info', 'Debug ready');
+    })();
+    </script>
 </body>
 </html>

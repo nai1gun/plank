@@ -28,6 +28,7 @@ async function loadParticipantsConfig() {
 
         if (configSnap.exists()) {
             PARTICIPANTS = configSnap.data().names || [];
+            console.log('Config loaded, participants:', PARTICIPANTS.join(', '));
         } else {
             // Initialize with default participants if config doesn't exist
             const defaultParticipants = [...DEFAULT_PARTICIPANTS];
@@ -104,6 +105,7 @@ function initAuth() {
         loading.style.display = 'none';
 
         if (user) {
+            console.log('Signed in as:', user.email);
             state.user = user;
             loggedOut.style.display = 'none';
             loggedIn.style.display = 'flex';
@@ -119,6 +121,7 @@ function initAuth() {
             renderCalendar();
             updateGraphs();
         } else {
+            console.log('Signed out');
             state.user = null;
             state.rounds = [];
             loggedOut.style.display = 'flex';
@@ -141,6 +144,7 @@ async function loadRounds() {
             id: doc.id,
             ...doc.data()
         }));
+        console.log('Loaded', state.rounds.length, 'rounds');
     } catch (error) {
         console.error('Error loading rounds:', error);
     }
